@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Форма обратной связи</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--tg-theme-bg-color, #f5f7fa);
+            color: var(--tg-theme-text-color, #2c3e50);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--tg-theme-button-color, #40a7e3) 0%, #8e44ad 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--tg-theme-hint-color, #7f8c8d);
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #2c3e50);
+            letter-spacing: 0.3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            font-size: 18px;
+            color: var(--tg-theme-hint-color, #95a5a6);
+            pointer-events: none;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            background-color: var(--tg-theme-bg-color, #ecf0f1);
+            color: var(--tg-theme-text-color, #2c3e50);
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            padding-left: 48px;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 20px;
+            padding-right: 48px;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--tg-theme-button-color, #40a7e3);
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            box-shadow: 0 4px 10px rgba(64, 167, 227, 0.1);
+        }
+
+        .file-upload {
+            border: 2px dashed var(--tg-theme-hint-color, #bdc3c7);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--tg-theme-bg-color, #ecf0f1);
+        }
+
+        .file-upload:hover {
+            border-color: var(--tg-theme-button-color, #40a7e3);
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-upload label {
+            display: block;
+            margin: 0;
+            cursor: pointer;
+            color: var(--tg-theme-hint-color, #7f8c8d);
+        }
+
+        .file-upload label i {
+            display: block;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: var(--tg-theme-button-color, #40a7e3);
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--tg-theme-text-color, #2c3e50);
+            word-break: break-all;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            padding: 0;
+            accent-color: var(--tg-theme-button-color, #40a7e3);
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            padding: 8px 0;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            padding: 0;
+            accent-color: var(--tg-theme-button-color, #40a7e3);
+        }
+
+        .radio-option label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+            padding-left: 16px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .success-screen h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--tg-theme-text-color, #2c3e50);
+        }
+
+        .success-screen p {
+            color: var(--tg-theme-hint-color, #7f8c8d);
+            margin-bottom: 24px;
+        }
+
+        .reset-button {
+            background-color: var(--tg-theme-button-color, #40a7e3);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .reset-button:hover {
+            opacity: 0.9;
+        }
+
+        .reset-button:active {
+            transform: scale(0.97);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #95a5a6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Форма ввода -->
+        <div id="formSection">
+            <div class="header">
+                <h1>📋 Форма обратной связи</h1>
+                <p>Заполните данные, они придут создателю</p>
+            </div>
+
+            <form id="dataForm">
+                <!-- Имя -->
+                <div class="form-group">
+                    <label>👤 Ваше имя</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="name" placeholder="Введите ваше имя" maxlength="50">
+                    </div>
+                    <div class="error-message" id="nameError">Имя обязательно для заполнения</div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label>📧 Email</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📧</span>
+                        <input type="email" id="email" placeholder="example@mail.com">
+                    </div>
+                    <div class="error-message" id="emailError">Введите корректный email</div>
+                </div>
+
+                <!-- Телефон -->
+                <div class="form-group">
+                    <label>📱 Телефон</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📱</span>
+                        <input type="tel" id="phone" placeholder="+7 (999) 999-99-99">
+                    </div>
+                </div>
+
+                <!-- Тема обращения -->
+                <div class="form-group">
+                    <label>📌 Тема обращения</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📌</span>
+                        <select id="subject">
+                            <option value="question">❓ Вопрос</option>
+                            <option value="suggestion">💡 Предложение</option>
+                            <option value="complaint">⚠️ Жалоба</option>
+                            <option value="cooperation">🤝 Сотрудничество</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Сообщение -->
+                <div class="form-group">
+                    <label>💬 Сообщение</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">💬</span>
+                        <textarea id="message" placeholder="Напишите ваше сообщение..." maxlength="1000"></textarea>
+                    </div>
+                    <div class="error-message" id="messageError">Сообщение не может быть пустым</div>
+                    <div style="text-align: right; font-size: 12px; color: var(--tg-theme-hint-color); margin-top: 5px;">
+                        <span id="charCount">0</span>/1000
+                    </div>
+                </div>
+
+                <!-- Приоритет (Radio) -->
+                <div class="form-group">
+                    <label>⚡ Приоритет</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="low" name="priority" value="low" checked>
+                            <label for="low">🟢 Низкий</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="medium" name="priority" value="medium">
+                            <label for="medium">🟡 Средний</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="high" name="priority" value="high">
+                            <label for="high">🔴 Высокий</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Загрузка файла -->
+                <div class="form-group">
+                    <label>📎 Прикрепить файл (необязательно)</label>
+                    <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt">
+                        <label>
+                            <i>📁</i>
+                            Нажмите для загрузки
+                        </label>
+                    </div>
+                    <div id="fileName" class="file-name"></div>
+                </div>
+
+                <!-- Согласие на обработку данных -->
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="agreement">
+                        <label for="agreement">Я согласен на обработку персональных данных</label>
+                    </div>
+                    <div class="error-message" id="agreementError">Необходимо ваше согласие</div>
+                </div>
+            </form>
+
+            <div class="form-footer">
+                * Все поля обязательны, кроме файла
+            </div>
+        </div>
+
+        <!-- Экран успеха -->
+        <div id="successSection" class="success-screen">
+            <div class="success-icon">✅</div>
+            <h2>Отправлено!</h2>
+            <p>Спасибо! Ваши данные успешно отправлены создателю.</p>
+            <button class="reset-button" onclick="resetForm()">📝 Отправить ещё</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        
+        // Инициализация
+        tg.ready();
+        tg.expand();
+        
+        // Получаем элементы
+        const formSection = document.getElementById('formSection');
+        const successSection = document.getElementById('successSection');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const subjectSelect = document.getElementById('subject');
+        const messageInput = document.getElementById('message');
+        const agreementCheck = document.getElementById('agreement');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const charCount = document.getElementById('charCount');
+        
+        // Счетчик символов
+        messageInput.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+            validateForm();
+        });
+        
+        // Валидация в реальном времени
+        [nameInput, emailInput, phoneInput, messageInput, agreementCheck].forEach(input => {
+            input.addEventListener('input', validateForm);
+            input.addEventListener('change', validateForm);
+        });
+        
+        // Отображение имени файла
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName.textContent = `Выбран: ${this.files[0].name}`;
+            } else {
+                fileName.textContent = '';
+            }
+        });
+        
+        // Валидация формы
+        function validateForm() {
+            let isValid = true;
+            
+            // Проверка имени
+            const nameError = document.getElementById('nameError');
+            if (!nameInput.value.trim()) {
+                nameError.classList.add('show');
+                isValid = false;
+            } else {
+                nameError.classList.remove('show');
+            }
+            
+            // Проверка email
+            const emailError = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value)) {
+                emailError.classList.add('show');
+                isValid = false;
+            } else {
+                emailError.classList.remove('show');
+            }
+            
+            // Проверка сообщения
+            const messageError = document.getElementById('messageError');
+            if (!messageInput.value.trim()) {
+                messageError.classList.add('show');
+                isValid = false;
+            } else {
+                messageError.classList.remove('show');
+            }
+            
+            // Проверка согласия
+            const agreementError = document.getElementById('agreementError');
+            if (!agreementCheck.checked) {
+                agreementError.classList.add('show');
+                isValid = false;
+            } else {
+                agreementError.classList.remove('show');
+            }
+            
+            // Управление главной кнопкой
+            if (isValid) {
+                tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
+            }
+            
+            return isValid;
+        }
+        
+        // Настройка главной кнопки
+        tg.MainButton.setText("📨 ОТПРАВИТЬ ДАННЫЕ");
+        tg.MainButton.setTextColor("#ffffff");
+        tg.MainButton.setBackgroundColor("#40a7e3");
+        
+        // Обработка отправки
+        tg.MainButton.onClick(() => {
+            if (validateForm()) {
+                tg.MainButton.showProgress();
+                
+                // Получаем выбранный приоритет
+                const priority = document.querySelector('input[name="priority"]:checked').value;
+                
+                // Формируем данные для отправки
+                const formData = {
+                    type: 'form_submission',
+                    timestamp: new Date().toISOString(),
+                    data: {
+                        name: nameInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        phone: phoneInput.value.trim() || 'Не указан',
+                        subject: subjectSelect.options[subjectSelect.selectedIndex].text,
+                        subject_value: subjectSelect.value,
+                        message: messageInput.value.trim(),
+                        priority: priority,
+                        has_file: fileInput.files.length > 0 ? fileInput.files[0].name : 'Нет'
+                    },
+                    user: tg.initDataUnsafe?.user || {}
+                };
+                
+                // Отправляем данные
+                tg.sendData(JSON.stringify(formData));
+                
+                // Показываем экран успеха
+                setTimeout(() => {
+                    tg.MainButton.hide();
+                    tg.MainButton.hideProgress();
+                    formSection.style.display = 'none';
+                    successSection.classList.add('show');
+                    
+                    // Тактильная отдача
+                    tg.HapticFeedback.notificationOccurred('success');
+                }, 500);
+            }
+        });
+        
+        // Сброс формы
+        function resetForm() {
+            // Очищаем поля
+            nameInput.value = '';
+            emailInput.value = '';
+            phoneInput.value = '';
+            messageInput.value = '';
+            agreementCheck.checked = false;
+            fileInput.value = '';
+            fileName.textContent = '';
+            charCount.textContent = '0';
+            
+            // Сбрасываем радио на "низкий"
+            document.getElementById('low').checked = true;
+            
+            // Скрываем ошибки
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+            });
+            
+            // Показываем форму
+            formSection.style.display = 'block';
+            successSection.classList.remove('show');
+            
+            // Прячем кнопку
+            tg.MainButton.hide();
+        }
+        
+        // Кнопка настроек
+        tg.SettingsButton.show();
+        tg.SettingsButton.onClick(() => {
+            tg.showPopup({
+                title: "О приложении",
+                message: "Форма обратной связи v1.0\n\nЗаполните все поля и отправьте данные создателю.",
+                buttons: [{type: "close"}]
+            });
+        });
+        
+        // Запускаем валидацию при загрузке
+        validateForm();
+    </script>
+</body>
+</html>
+
